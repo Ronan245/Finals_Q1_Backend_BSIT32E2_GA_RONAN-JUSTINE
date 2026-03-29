@@ -27,7 +27,8 @@ namespace TodoApi.Controllers
             {
                 Id = Guid.NewGuid(),
                 Title = todo.Title.Trim(),
-                Completed = todo.Completed
+                Completed = todo.Completed,
+                CreatedAt = DateTime.UtcNow
             };
 
             _todos.Add(newTodo);
