@@ -37,6 +37,11 @@ namespace TodoApi.Controllers
                 return BadRequest("Title is required.");
             }
 
+            if (!HashHelper.IsValidProof(todo.Title.Trim(), todo.Nonce, todo.Proof))
+            {
+                return BadRequest("Invalid proof of work.");
+            }
+
             var previousHash = _todos.Count > 0 ? _todos.Last().Hash : "GENESIS";
 
             var newTodo = new Todo
@@ -45,7 +50,9 @@ namespace TodoApi.Controllers
                 Title = todo.Title.Trim(),
                 Completed = todo.Completed,
                 CreatedAt = DateTime.UtcNow,
-                PreviousHash = previousHash
+                PreviousHash = previousHash,
+                Nonce = todo.Nonce,
+                Proof = todo.Proof
             };
 
             newTodo.Hash = HashHelper.ComputeHash(newTodo, newTodo.PreviousHash);
@@ -63,6 +70,11 @@ namespace TodoApi.Controllers
                 return BadRequest("Title is required.");
             }
 
+            if (!HashHelper.IsValidProof(updatedTodo.Title.Trim(), updatedTodo.Nonce, updatedTodo.Proof))
+            {
+                return BadRequest("Invalid proof of work.");
+            }
+
             var index = _todos.FindIndex(t => t.Id == id);
 
             if (index == -1)
@@ -72,6 +84,8 @@ namespace TodoApi.Controllers
 
             _todos[index].Title = updatedTodo.Title.Trim();
             _todos[index].Completed = updatedTodo.Completed;
+            _todos[index].Nonce = updatedTodo.Nonce;
+            _todos[index].Proof = updatedTodo.Proof;
 
             RebuildChainFrom(index);
 
